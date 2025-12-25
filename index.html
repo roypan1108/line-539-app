@@ -207,7 +207,7 @@
 
     <script>
         // --- 設定與變數 ---
-        const LIFF_ID = "YOUR_LIFF_ID"; // ★ 請在這裡填入你的 LIFF ID ★
+        const LIFF_ID = "2008778133-kbg1hN0u"; // ★ 請在這裡填入你的 LIFF ID ★
         
         let selectedNumbers = new Set();
         let selectedStars = new Set();
@@ -304,7 +304,7 @@
         }
 
         // --- 初始化 LIFF ---
-        liff.init({ liffId: 2008778133-kbg1hN0u }).then(() => {
+        liff.init({ liffId: LIFF_ID }).then(() => {
             console.log("LIFF Ready");
         }).catch(err => {
             console.error(err);
