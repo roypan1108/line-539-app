@@ -207,7 +207,7 @@
 
         // 6. 初始化 LIFF 並送出訊息
         // 記得將 YOUR_LIFF_ID 換成你申請的 ID
-        liff.init({ liffId: "YOUR_LIFF_ID" }).then(() => {
+        liff.init({ liffId: "2008778133-kbg1hN0u" }).then(() => {
             console.log("LIFF Initialized");
         }).catch(err => {
             console.error(err);
@@ -235,4 +235,5 @@
         }
     </script>
 </body>
+
 </html>
