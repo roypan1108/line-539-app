@@ -3,80 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>539 選號小幫手</title>
+    <title>539 選號下注</title>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
-        /* 全局設定：字體放大，禁止縮放 */
+        /* --- 全局設定 --- */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: #f0f0f0;
+            background-color: #f5f5f5;
             margin: 0;
-            padding: 20px 10px;
+            padding: 10px 10px 140px 10px; /* 底部留白給固定選單 */
             display: flex;
             flex-direction: column;
             align-items: center;
-            touch-action: manipulation; /* 優化觸控 */
+            touch-action: manipulation;
         }
 
-        /* 頂部提示區：清楚告知狀態 */
+        /* --- 頂部狀態列 --- */
         #status-bar {
-            position: sticky;
-            top: 0;
-            background-color: #f0f0f0;
+            background-color: #f5f5f5;
             width: 100%;
             text-align: center;
             padding-bottom: 10px;
-            z-index: 10;
+            margin-bottom: 10px;
+        }
+        h2 { margin: 0; color: #333; font-size: 1.4rem; }
+        .subtitle { font-size: 1.1rem; color: #666; margin-top: 5px; }
+
+        /* --- 1. 號碼區 (Grid) --- */
+        .section-title {
+            width: 100%;
+            text-align: left;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #444;
+            margin: 10px 0 5px 5px;
+            border-left: 5px solid #d32f2f;
+            padding-left: 8px;
         }
 
-        h2 {
-            margin: 0;
-            color: #333;
-            font-size: 1.5rem; /* 大標題 */
-        }
-
-        .subtitle {
-            font-size: 1.2rem;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        /* 號碼網格區：5欄排列，適合手機寬度 */
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(5, 1fr); /* 5欄 */
+            gap: 8px;
             width: 100%;
             max-width: 400px;
-            margin-bottom: 80px; /* 留給底部按鈕空間 */
         }
 
-        /* 號碼按鈕：圓形、大字體、高對比 */
         .num-btn {
             background-color: #ffffff;
-            border: 2px solid #ccc;
-            border-radius: 50%; /* 圓形 */
-            aspect-ratio: 1 / 1; /* 保持正圓 */
+            border: 1px solid #ccc;
+            border-radius: 50%;
+            aspect-ratio: 1 / 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: bold;
             color: #333;
-            cursor: pointer;
+            box-shadow: 0 2px 2px rgba(0,0,0,0.1);
             transition: all 0.1s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        /* 選中狀態：鮮豔背景，白色文字 */
         .num-btn.selected {
-            background-color: #d32f2f; /* 鮮豔紅 */
-            border-color: #b71c1c;
+            background-color: #d32f2f; /* 紅色 */
             color: white;
-            transform: scale(1.1); /* 稍微放大 */
+            border-color: #b71c1c;
+            transform: scale(1.1);
         }
 
-        /* 底部控制區：固定在下方 */
+        /* --- 2. 玩法選項 (幾星) --- */
+        .options-row {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            max-width: 400px;
+            justify-content: flex-start; /* 靠左排列 */
+            margin-bottom: 15px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #999;
+            background-color: white;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            text-align: center;
+            color: #333;
+        }
+
+        .toggle-btn.active {
+            background-color: #1976D2; /* 藍色代表選項 */
+            color: white;
+            border-color: #0D47A1;
+            font-weight: bold;
+        }
+
+        /* --- 3. 數量調整 (加減按鈕) --- */
+        .stepper-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            width: 100%;
+            max-width: 380px;
+            box-sizing: border-box;
+        }
+
+        .step-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: none;
+            background-color: #eee;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .step-btn:active { background-color: #ccc; }
+
+        #bet-amount {
+            font-size: 1.5rem;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        /* --- 底部控制區 --- */
         .control-panel {
             position: fixed;
             bottom: 0;
@@ -86,154 +144,194 @@
             padding: 15px;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
             display: flex;
-            justify-content: space-around;
+            justify-content: space-between;
+            gap: 10px;
             box-sizing: border-box;
+            z-index: 99;
         }
 
-        /* 動作按鈕 */
         .action-btn {
-            padding: 15px 30px;
+            padding: 15px 0;
             font-size: 1.2rem;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             font-weight: bold;
-            width: 45%;
+            text-align: center;
+            flex: 1;
         }
 
-        /* 清除按鈕 */
-        .btn-clear {
-            background-color: #e0e0e0;
-            color: #333;
-        }
-
-        /* 送出按鈕 */
+        .btn-clear { background-color: #e0e0e0; color: #333; max-width: 80px;}
+        
         .btn-submit {
-            background-color: #4CAF50; /* LINE 綠 */
+            background-color: #4CAF50;
             color: white;
-            opacity: 0.5; /* 預設半透明(不可點) */
-            pointer-events: none;
+            opacity: 0.5;
+            pointer-events: none; /* 預設不可點 */
         }
 
-        /* 當選滿5個時，送出按鈕變為可點擊 */
         .btn-submit.active {
             opacity: 1;
             pointer-events: auto;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
-
     </style>
 </head>
 <body>
 
     <div id="status-bar">
-        <h2>539 選號</h2>
+        <h2>539 下注單</h2>
         <div class="subtitle" id="count-text">請選 5 個號碼 (0/5)</div>
     </div>
 
-    <div class="grid-container" id="grid">
-        </div>
+    <div class="section-title">第一步：選號碼</div>
+    <div class="grid-container" id="grid"></div>
+
+    <div class="section-title" style="margin-top:20px;">第二步：選玩法 (可複選)</div>
+    <div class="options-row">
+        <div class="toggle-btn" onclick="toggleStar(this, '2星')">2星</div>
+        <div class="toggle-btn" onclick="toggleStar(this, '3星')">3星</div>
+        <div class="toggle-btn" onclick="toggleStar(this, '4星')">4星</div>
+    </div>
+
+    <div class="section-title">第三步：下幾注?</div>
+    <div class="stepper-container">
+        <button class="step-btn" onclick="changeAmount(-1)">−</button>
+        <span id="bet-amount">1</span>
+        <button class="step-btn" onclick="changeAmount(1)">+</button>
+        <span style="font-size:1.2rem;">注</span>
+    </div>
 
     <div class="control-panel">
-        <button class="action-btn btn-clear" onclick="resetSelection()">重選</button>
-        <button class="action-btn btn-submit" id="submit-btn" onclick="sendToLine()">送出</button>
+        <button class="action-btn btn-clear" onclick="resetAll()">重來</button>
+        <button class="action-btn btn-submit" id="submit-btn" onclick="sendToLine()">送出下注</button>
     </div>
 
     <script>
-        // 1. 初始化
+        // --- 設定與變數 ---
+        const LIFF_ID = "YOUR_LIFF_ID"; // ★ 請在這裡填入你的 LIFF ID ★
+        
+        let selectedNumbers = new Set();
+        let selectedStars = new Set();
+        let betAmount = 1;
+
         const grid = document.getElementById('grid');
         const countText = document.getElementById('count-text');
         const submitBtn = document.getElementById('submit-btn');
-        let selectedNumbers = new Set(); // 使用 Set 來儲存選中的號碼，避免重複
+        const amountDisplay = document.getElementById('bet-amount');
 
-        // 2. 自動產生 1-39 的按鈕
+        // --- 初始化：產生 1-39 按鈕 ---
         for (let i = 1; i <= 39; i++) {
-            let btn = document.createElement('div');
-            // 補零格式，例如 5 變成 '05'
             let numStr = i.toString().padStart(2, '0');
+            let btn = document.createElement('div');
             btn.className = 'num-btn';
             btn.textContent = numStr;
-            btn.dataset.value = numStr;
-            
-            // 點擊事件
             btn.onclick = () => toggleNumber(btn, numStr);
             grid.appendChild(btn);
         }
 
-        // 3. 切換號碼選取狀態
+        // --- 邏輯：選號碼 ---
         function toggleNumber(btn, num) {
             if (selectedNumbers.has(num)) {
-                // 如果已經選過，則取消
                 selectedNumbers.delete(num);
                 btn.classList.remove('selected');
             } else {
-                // 限制最多選 5 個
                 if (selectedNumbers.size >= 5) {
-                    alert('阿公/阿嬤，只能選 5 個號碼喔！\n請先取消一個再選。');
+                    alert('只能選 5 個號碼喔！');
                     return;
                 }
-                // 選取
                 selectedNumbers.add(num);
                 btn.classList.add('selected');
             }
-            updateUI();
+            checkSubmitState();
         }
 
-        // 4. 更新介面顯示 (文字與按鈕狀態)
-        function updateUI() {
-            const count = selectedNumbers.size;
-            countText.textContent = `請選 5 個號碼 (${count}/5)`;
-            
-            // 只有選滿 5 個時，送出按鈕才亮起
-            if (count === 5) {
-                submitBtn.classList.add('active');
-                submitBtn.textContent = "確認送出";
-                countText.style.color = "green";
-                countText.textContent = "選好了！請按送出";
+        // --- 邏輯：選玩法 (星星) ---
+        function toggleStar(btn, type) {
+            if (selectedStars.has(type)) {
+                selectedStars.delete(type);
+                btn.classList.remove('active');
             } else {
-                submitBtn.classList.remove('active');
-                submitBtn.textContent = "還沒選完";
+                selectedStars.add(type);
+                btn.classList.add('active');
+            }
+            checkSubmitState();
+        }
+
+        // --- 邏輯：增減數量 ---
+        function changeAmount(delta) {
+            let newVal = betAmount + delta;
+            if (newVal < 1) newVal = 1;
+            if (newVal > 100) newVal = 100; // 上限
+            betAmount = newVal;
+            amountDisplay.textContent = betAmount;
+        }
+
+        // --- 邏輯：檢查是否可以送出 ---
+        function checkSubmitState() {
+            // 條件：必須選滿 5 個號碼
+            const numCount = selectedNumbers.size;
+            countText.textContent = `請選 5 個號碼 (${numCount}/5)`;
+            
+            // 條件放寬：只要選滿5個號碼就可以送出，如果沒選星星，程式預設或跳提醒
+            if (numCount === 5) {
+                countText.textContent = "選好了！";
+                countText.style.color = "green";
+                
+                // 檢查有沒有選玩法
+                if (selectedStars.size === 0) {
+                     submitBtn.textContent = "請選玩法(幾星)";
+                     submitBtn.classList.remove('active');
+                } else {
+                     submitBtn.textContent = "確認送出";
+                     submitBtn.classList.add('active');
+                }
+            } else {
                 countText.style.color = "#666";
+                submitBtn.textContent = "還沒選完號碼";
+                submitBtn.classList.remove('active');
             }
         }
 
-        // 5. 重置所有選項
-        function resetSelection() {
+        // --- 重置 ---
+        function resetAll() {
             selectedNumbers.clear();
-            document.querySelectorAll('.num-btn').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            updateUI();
+            selectedStars.clear();
+            betAmount = 1;
+            amountDisplay.textContent = 1;
+
+            document.querySelectorAll('.num-btn').forEach(b => b.classList.remove('selected'));
+            document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+            checkSubmitState();
         }
 
-        // 6. 初始化 LIFF 並送出訊息
-        // 記得將 YOUR_LIFF_ID 換成你申請的 ID
-        liff.init({ liffId: "2008778133-kbg1hN0u" }).then(() => {
-            console.log("LIFF Initialized");
+        // --- 初始化 LIFF ---
+        liff.init({ liffId: 2008778133-kbg1hN0u }).then(() => {
+            console.log("LIFF Ready");
         }).catch(err => {
             console.error(err);
         });
 
+        // --- 送出訊息 ---
         function sendToLine() {
             if (selectedNumbers.size !== 5) return;
+            if (selectedStars.size === 0) {
+                alert("請至少選擇一種玩法 (例如 2星)");
+                return;
+            }
 
-            // 將 Set 轉為陣列並排序 (小到大)
-            const sortedNums = Array.from(selectedNumbers).sort((a, b) => a - b);
-            const msgText = `我要下注：${sortedNums.join(', ')}`;
+            const nums = Array.from(selectedNumbers).sort((a,b)=>a-b).join(', ');
+            const stars = Array.from(selectedStars).join('、'); // 2星、3星
+            
+            // 組合訊息文字
+            const msg = `【539下注單】\n號碼：${nums}\n玩法：${stars}\n數量：${betAmount} 注`;
 
             if (liff.isInClient()) {
-                liff.sendMessages([{
-                    type: 'text',
-                    text: msgText
-                }]).then(() => {
-                    liff.closeWindow(); // 發送成功後關閉視窗
-                }).catch((err) => {
-                    alert('發送失敗，請重試');
-                });
+                liff.sendMessages([{ type: 'text', text: msg }])
+                    .then(() => liff.closeWindow())
+                    .catch(err => alert("發送失敗"));
             } else {
-                alert('這個功能只能在 LINE 裡面使用喔！\n您選的是：' + msgText);
+                alert("測試模式：\n" + msg);
             }
         }
     </script>
 </body>
-
 </html>
